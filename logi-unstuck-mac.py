@@ -50,8 +50,8 @@ class Proc:
     ppid: str = "?"
     user: str = "?"
     stat: str = "?"
-    comm: str = "?"
-    args: str = "?"
+    app: str = "?"
+    command: str = "?"
 
 
 def run_text(cmd: list[str]) -> str:
@@ -66,17 +66,44 @@ def secure_input_pids() -> list[int]:
     return sorted({int(match) for match in SECURE_INPUT_RE.findall(out)})
 
 
+def friendly_app_name(command: str) -> str:
+    if not command:
+        return "?"
+
+    marker = ".app/Contents/MacOS/"
+    if marker in command:
+        app_path = command.split(marker, 1)[0] + ".app"
+        return os.path.basename(app_path)
+
+    executable = command.split(None, 1)[0]
+    return os.path.basename(executable)
+
+
 def process_info(pid: int) -> Proc:
-    out = run_text(["ps", "-p", str(pid), "-o", "pid=,ppid=,user=,stat=,comm=,args="])
-    if not out.strip():
-        return Proc(pid=pid, stat="stale", comm="<exited>", args="<PID still in ioreg; no running process>")
+    meta = run_text(["ps", "-p", str(pid), "-o", "pid=,ppid=,user=,stat="]).strip()
+    command = run_text(["ps", "-ww", "-p", str(pid), "-o", "command="]).strip()
 
-    parts = out.strip().split(None, 5)
-    if len(parts) < 6:
-        return Proc(pid=pid, args=out.strip())
+    if not meta or not command:
+        return Proc(
+            pid=pid,
+            stat="stale",
+            app="<exited>",
+            command="<PID still in ioreg; no running process>",
+        )
 
-    pid_s, ppid, user, stat, comm, args = parts
-    return Proc(pid=int(pid_s), ppid=ppid, user=user, stat=stat, comm=comm, args=args)
+    parts = meta.split(None, 3)
+    if len(parts) < 4:
+        return Proc(pid=pid, command=command)
+
+    pid_s, ppid, user, stat = parts
+    return Proc(
+        pid=int(pid_s),
+        ppid=ppid,
+        user=user,
+        stat=stat,
+        app=friendly_app_name(command),
+        command=command,
+    )
 
 
 def get_processes() -> list[Proc]:
@@ -94,7 +121,7 @@ def is_alive(pid: int) -> bool:
 
 
 def is_stale(proc: Proc) -> bool:
-    return proc.stat == "stale" or proc.comm == "<exited>"
+    return proc.stat == "stale" or proc.app == "<exited>"
 
 
 def send_signal(pid: int, sig: signal.Signals) -> tuple[bool, str]:
@@ -139,7 +166,7 @@ def draw(stdscr: curses.window, procs: list[Proc], selected: int, message: str) 
         stdscr.refresh()
         return
 
-    header = f"{'PID':>6} {'PPID':>6} {'USER':<12} {'STATE':<8} COMMAND"
+    header = f"{'PID':>6} {'PPID':>6} {'USER':<12} {'STATE':<8} APP / COMMAND"
     addstr_safe(stdscr, 3, 0, header, curses.A_UNDERLINE)
 
     visible_rows = max(1, height - 7)
@@ -150,7 +177,7 @@ def draw(stdscr: curses.window, procs: list[Proc], selected: int, message: str) 
         attr = curses.A_REVERSE if index == selected else curses.A_NORMAL
         state = "stale" if is_stale(proc) else proc.stat
         hint = "  [try lock/unlock]" if is_stale(proc) else ""
-        line = f"{proc.pid:>6} {proc.ppid:>6} {proc.user:<12.12} {state:<8.8} {proc.comm}  {proc.args}{hint}"
+        line = f"{proc.pid:>6} {proc.ppid:>6} {proc.user:<12.12} {state:<8.8} {proc.app:<20.20} {proc.command}{hint}"
         addstr_safe(stdscr, row, 0, line, attr)
 
     addstr_safe(stdscr, height - 2, 0, f"{running} running, {stale} stale")
@@ -209,12 +236,12 @@ def inspect_process(stdscr: curses.window, proc: Proc) -> str:
         return f"PID {current.pid} is stale; try lock/unlock"
 
     lines = [
-        f"PID:  {current.pid}",
-        f"PPID: {current.ppid}",
-        f"User: {current.user}",
-        f"Stat: {current.stat}",
-        f"Cmd:  {current.comm}",
-        f"Args: {current.args}",
+        f"PID:     {current.pid}",
+        f"PPID:    {current.ppid}",
+        f"User:    {current.user}",
+        f"Stat:    {current.stat}",
+        f"App:     {current.app}",
+        f"Command: {current.command}",
     ]
     answer = prompt(stdscr, lines, "Send TERM to this process? [y/n]", "yn")
     if answer != "y":
@@ -244,7 +271,7 @@ def kill_running(stdscr: curses.window, procs: list[Proc]) -> str:
     if not running:
         return "only stale ioreg PID(s) found; try lock/unlock"
 
-    lines = [f"{proc.pid}  {proc.comm}  {proc.args}" for proc in running[:10]]
+    lines = [f"{proc.pid}  {proc.app}  {proc.command}" for proc in running[:10]]
     if len(running) > 10:
         lines.append(f"...and {len(running) - 10} more")
     if stale_count:
@@ -264,7 +291,7 @@ def kill_running(stdscr: curses.window, procs: list[Proc]) -> str:
 
     answer = prompt(
         stdscr,
-        [f"{proc.pid}  {proc.comm}" for proc in alive[:10]],
+        [f"{proc.pid}  {proc.app}" for proc in alive[:10]],
         f"{len(alive)} still alive. Force kill remaining? [y/n]",
         "yn",
     )
