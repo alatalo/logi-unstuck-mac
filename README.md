@@ -2,9 +2,11 @@
 
 A small macOS terminal UI helper for Logitech Options / Logi Options+ Secure Input issues.
 
-Sometimes Logitech MX Keys / MX Master features stop working on macOS. One common symptom is the MX Master thumb wheel no longer switching between Spaces or other mapped key shortcuts stop working. Logitech documents a common cause for the issue: some app has enabled macOS Secure Input and it's intefering with the Logitech key shortcut.
+Sometimes Logitech MX Keys / MX Master features stop working on macOS. One common symptom is the MX Master thumb wheel no longer switching between Spaces or other mapped key shortcuts stop working. [Logitech documents](https://support.logi.com/hc/en-us/articles/360023189334-Logitech-Options-and-Options-issues-when-Secure-Input-is-enabled) a common cause for the issue: some app has enabled macOS Secure Input and it's intefering with the Logitech key shortcut.
 
 Logi Unstuck Mac shows the processes macOS reports as the Secure Input owners and helps you kill the offending ones.
+
+The script and documentation were co-authored with GPT-5.5 Thinking as a coding and troubleshooting assistant.
 
 ## Killing processes is not always enough
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LogiUnstuck
+Logi Unstuck Mac
 
 Problem: Logitech Logi Options / Options+ features can stop working on macOS.
 For example, MX Master thumb wheel Spaces switching may stop responding.
@@ -17,20 +17,13 @@ https://support.logi.com/hc/en-us/articles/360023189334-Logitech-Options-and-Opt
 Run:
   python3 logi-unstuck.py
 
-Controls:
-  Up/Down, j/k  Move selection
-  Enter         Inspect selected entry
-  a             Kill running owner process(es)
-  l             Lock screen
-  r             Refresh
-  q, Esc        Quit
-
 Notes:
 * Killing a process is not always enough.
 * If ioreg still reports a PID after the process exited, try lock/unlock.
 * If the session state stays stuck, logout/login or reboot may be needed.
 
-Ville Alatalo 2026 https://github.com/alatalo with GPT-5.5
+Ville Alatalo 2026 with GPT-5.5 Thinking
+https://github.com/alatalo/logi-unstuck-mac
 """
 
 from __future__ import annotations
@@ -44,7 +37,6 @@ import shutil
 import subprocess
 import time
 from dataclasses import dataclass
-
 
 APP_NAME = "LogiUnstuck"
 VERSION = "0.1.0"
