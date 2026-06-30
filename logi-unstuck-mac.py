@@ -38,7 +38,7 @@ import subprocess
 import time
 from dataclasses import dataclass
 
-APP_NAME = "LogiUnstuck"
+APP_NAME = "Logi Unstuck Mac"
 VERSION = "0.1.0"
 SECURE_INPUT_RE = re.compile(r'"kCGSSessionSecureInputPID"=(\d+)')
 os.environ.setdefault("ESCDELAY", "25")
@@ -130,11 +130,11 @@ def draw(stdscr: curses.window, procs: list[Proc], selected: int, message: str) 
     running = sum(1 for proc in procs if not is_stale(proc))
     stale = len(procs) - running
 
-    addstr_safe(stdscr, 0, 0, f"{APP_NAME} - macOS Secure Input helper", curses.A_BOLD)
-    addstr_safe(stdscr, 1, 0, "Up/Down: select  Enter: inspect  a: kill running  l: lock screen  r: refresh  q/Esc: quit")
+    addstr_safe(stdscr, 0, 0, f"{APP_NAME} - macOS Secure Input helper for Logitech Options+", curses.A_BOLD)
+    addstr_safe(stdscr, 1, 0, "Up/Down/Enter: select  a: kill all  l: lock screen  r: refresh  q: quit")
 
     if not procs:
-        addstr_safe(stdscr, 4, 0, "No Secure Input owner found.", curses.A_BOLD)
+        addstr_safe(stdscr, 4, 0, "No Secure Input processes found.", curses.A_BOLD)
         addstr_safe(stdscr, height - 1, 0, message)
         stdscr.refresh()
         return
