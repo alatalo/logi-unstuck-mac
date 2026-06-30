@@ -2,9 +2,9 @@
 
 A small macOS terminal UI helper for Logitech Options / Logi Options+ Secure Input issues.
 
-Sometimes Logitech MX Keys / MX Master features stop working on macOS. One common symptom is the MX Master thumb wheel no longer switching between Spaces or other mapped key shortcuts stop working. [Logitech documents](https://support.logi.com/hc/en-us/articles/360023189334-Logitech-Options-and-Options-issues-when-Secure-Input-is-enabled) a common cause for the issue: some app has enabled macOS Secure Input and it's intefering with the Logitech key shortcut.
+Sometimes Logitech MX Keys / MX Master features stop working on macOS. One common symptom is the MX Master thumb wheel no longer switching between Spaces or other mapped key shortcuts stop working. [Logitech documents](https://support.logi.com/hc/en-us/articles/360023189334-Logitech-Options-and-Options-issues-when-Secure-Input-is-enabled) a common cause for the issue: some app has enabled macOS Secure Input and it's interfering with the Logitech key shortcut.
 
-Logi Unstuck Mac shows the processes macOS reports as the Secure Input owners and helps you kill the offending ones.
+Logi Unstuck Mac shows the processes macOS reports as Secure Input owners and helps you inspect, terminate, or work around stale session state.
 
 The script and documentation were co-authored with GPT-5.5 Thinking as a coding and troubleshooting assistant.
 
@@ -25,6 +25,7 @@ Recommended action:
 ## Run
 
 ```bash
+curl -O https://raw.githubusercontent.com/alatalo/logi-unstuck-mac/main/logi-unstuck-mac.py
 python3 logi-unstuck-mac.py
 ```
 
@@ -50,11 +51,11 @@ ioreg -l -d 1 -w 0 | grep SecureInput
 ps -p <pid>
 ```
 
-If `ioreg` reports a PID but `ps` cannot find it, the entry is stale and lock/unlock is adviced.
+If `ioreg` reports a PID but `ps` cannot find it, the entry is stale and lock/unlock is advised.
 
 ## Safety note
 
-LogiUnstuck sends `TERM` first. It only offers `KILL` if the process is still alive.
+Logi Unstuck Mac sends `TERM` first. It only offers `KILL` if the process is still alive.
 
 Be careful when terminating system processes such as `loginwindow`; doing so may log you out or disrupt the current session.
 

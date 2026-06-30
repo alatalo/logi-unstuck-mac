@@ -15,7 +15,7 @@ Logitech Options and Options+ issues when Secure Input is enabled
 https://support.logi.com/hc/en-us/articles/360023189334-Logitech-Options-and-Options-issues-when-Secure-Input-is-enabled
 
 Run:
-  python3 logi-unstuck.py
+  python3 logi-unstuck-mac.py
 
 Notes:
 * Killing a process is not always enough.
